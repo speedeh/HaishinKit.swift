@@ -37,7 +37,12 @@ struct AddrInfo {
                 memcpy(&addr, ai.ai_addr, Int(ai.ai_addrlen))
                 let result = withUnsafePointer(to: &addr) {
                     $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                        try? lambda($0, Int32(ai.ai_addrlen))
+                        do {
+                            return try lambda($0, Int32(ai.ai_addrlen))
+                        } catch {
+                            print("AddrInfo.resolve: lambda threw error for address \(host):\(port): \(error)")
+                            return nil
+                        }
                     }
                 }
                 if let result {
